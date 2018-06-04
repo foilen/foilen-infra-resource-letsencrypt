@@ -1,0 +1,170 @@
+/*
+    Foilen Infra Resource Lets Encrypt
+    https://github.com/foilen/foilen-infra-resource-letsencrypt
+    Copyright (c) 2018 Foilen (http://foilen.com)
+
+    The MIT License
+    http://opensource.org/licenses/MIT
+
+ */
+package com.foilen.infra.resource.letsencrypt.plugin;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.shredzone.acme4j.challenge.Dns01Challenge;
+import org.shredzone.acme4j.util.CSRBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.foilen.infra.plugin.v1.core.context.ChangesContext;
+import com.foilen.infra.plugin.v1.core.context.CommonServicesContext;
+import com.foilen.infra.plugin.v1.core.context.TimerEventContext;
+import com.foilen.infra.plugin.v1.core.eventhandler.TimerEventHandler;
+import com.foilen.infra.plugin.v1.core.service.IPResourceService;
+import com.foilen.infra.plugin.v1.model.resource.LinkTypeConstants;
+import com.foilen.infra.resource.dns.DnsEntry;
+import com.foilen.infra.resource.dns.model.DnsEntryType;
+import com.foilen.infra.resource.letsencrypt.acme.AcmeService;
+import com.foilen.infra.resource.letsencrypt.acme.LetsencryptException;
+import com.foilen.infra.resource.webcertificate.WebsiteCertificate;
+import com.foilen.infra.resource.webcertificate.helper.CertificateHelper;
+import com.foilen.smalltools.crypt.spongycastle.asymmetric.AsymmetricKeys;
+import com.foilen.smalltools.crypt.spongycastle.asymmetric.RSACrypt;
+import com.foilen.smalltools.crypt.spongycastle.cert.RSACertificate;
+import com.foilen.smalltools.crypt.spongycastle.cert.RSATools;
+import com.foilen.smalltools.tools.ResourceTools;
+import com.foilen.smalltools.tuple.Tuple2;
+
+public class LetsEncryptRefreshOldCertsWaitDnsTimer implements TimerEventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(LetsEncryptRefreshOldCertsWaitDnsTimer.class);
+
+    private static final String CA_CERTIFICATE_TEXT = ResourceTools.getResourceAsString("lets-encrypt-x3-cross-signed.pem", LetsEncryptRefreshOldCertsWaitDnsTimer.class);
+
+    private AcmeService acmeService;
+
+    private String dnsWaitDomain;
+    private Map<String, Dns01Challenge> challengeByDomain;
+
+    private boolean foundOnLastCheck = false;
+
+    public LetsEncryptRefreshOldCertsWaitDnsTimer(AcmeService acmeService, String dnsWaitDomain, Map<String, Dns01Challenge> challengeByDomain) {
+        this.acmeService = acmeService;
+        this.dnsWaitDomain = dnsWaitDomain;
+        this.challengeByDomain = challengeByDomain;
+    }
+
+    @Override
+    public void timerHandler(CommonServicesContext services, ChangesContext changes, TimerEventContext event) {
+
+        // Wait for the domain + 30s
+        try {
+            InetAddress.getByName(dnsWaitDomain);
+        } catch (UnknownHostException e) {
+            // Wait 2 more minutes
+            logger.info("Domain {} not present. Waiting 2 more minutes", dnsWaitDomain);
+            services.getTimerService().timerAdd(new TimerEventContext(this, //
+                    "Let Encrypt - Complete - Wait DNS", //
+                    Calendar.MINUTE, //
+                    2, //
+                    true, //
+                    false));
+            return;
+        }
+
+        if (!foundOnLastCheck) {
+            // Wait just 30 seconds more
+            foundOnLastCheck = true;
+            services.getTimerService().timerAdd(new TimerEventContext(this, //
+                    "Let Encrypt - Complete - Wait last", //
+                    Calendar.SECOND, //
+                    30, //
+                    true, //
+                    false));
+        }
+
+        // Complete the challenges
+        Iterator<Entry<String, Dns01Challenge>> it = challengeByDomain.entrySet().iterator();
+        while (it.hasNext()) {
+            Entry<String, Dns01Challenge> entry = it.next();
+            try {
+                acmeService.challengeComplete(entry.getValue());
+            } catch (LetsencryptException e) {
+                // Challenge failed
+                logger.info("Failed the challenge for certificate: {}", entry.getKey());
+                it.remove();
+            }
+        }
+
+        // Get all the certificates
+        IPResourceService resourceService = services.getResourceService();
+        List<WebsiteCertificate> websiteCertificates = new ArrayList<>();
+        for (String domain : challengeByDomain.keySet()) {
+            websiteCertificates.addAll(resourceService.resourceFindAll( //
+                    resourceService.createResourceQuery(WebsiteCertificate.class) //
+                            .addEditorEquals(LetsEncryptWebsiteCertificateEditor.EDITOR_NAME) //
+                            .propertyEquals(WebsiteCertificate.PROPERTY_DOMAIN_NAMES, domain) //
+            ));
+        }
+        Map<String, WebsiteCertificate> websiteCertificateByDomain = new HashMap<>();
+        websiteCertificates.forEach(websiteCertificate -> {
+            String domain = websiteCertificate.getDomainNames().stream().findFirst().get();
+            websiteCertificateByDomain.put(domain, websiteCertificate);
+        });
+
+        // Get the certificates for the successful ones
+        List<Tuple2<AsymmetricKeys, RSACertificate>> keysAndCerts = new ArrayList<>();
+        for (String domain : challengeByDomain.keySet()) {
+            AsymmetricKeys asymmetricKeys = RSACrypt.RSA_CRYPT.generateKeyPair(4096);
+
+            CSRBuilder csrb = new CSRBuilder();
+            csrb.addDomain(domain);
+
+            try {
+                csrb.sign(RSATools.createKeyPair(asymmetricKeys));
+                byte[] csr = csrb.getEncoded();
+                RSACertificate certificate = acmeService.requestCertificate(csr);
+                certificate.setKeysForSigning(asymmetricKeys);
+                keysAndCerts.add(new Tuple2<>(asymmetricKeys, certificate));
+
+                logger.info("Successfully updated certificate: {}", domain);
+            } catch (Exception e) {
+                // Cert creation failed
+                logger.info("Failed to retrieve the certificate for: {}", domain);
+            }
+        }
+
+        // Delete the DNS wait entry
+        changes.resourceDelete(new DnsEntry(dnsWaitDomain, DnsEntryType.A, "127.0.0.1"));
+
+        // Update the certificates
+        for (Tuple2<AsymmetricKeys, RSACertificate> entry : keysAndCerts) {
+            RSACertificate rsaCertificate = entry.getB();
+            WebsiteCertificate newCert = CertificateHelper.toWebsiteCertificate(CA_CERTIFICATE_TEXT, rsaCertificate);
+
+            String commonName = newCert.getDomainNames().stream().findFirst().get();
+            WebsiteCertificate previousCert = websiteCertificateByDomain.get(commonName);
+
+            newCert.setResourceEditorName(LetsEncryptWebsiteCertificateEditor.EDITOR_NAME);
+            changes.resourceUpdate(previousCert, newCert);
+        }
+
+        // Delete the DNS entries for challenges
+        for (WebsiteCertificate websiteCertificate : websiteCertificates) {
+            List<DnsEntry> dnsEntries = resourceService.linkFindAllByFromResourceAndLinkTypeAndToResourceClass(websiteCertificate, LinkTypeConstants.MANAGES, DnsEntry.class);
+            for (DnsEntry dnsEntry : dnsEntries) {
+                changes.resourceDelete(dnsEntry);
+            }
+        }
+
+    }
+
+}

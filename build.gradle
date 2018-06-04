@@ -1,0 +1,51 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
+}
+
+allprojects {
+
+  apply plugin: 'eclipse'
+
+  group = 'com.foilen'
+  version = System.getenv('VERSION')?:'master-SNAPSHOT'
+
+}
+
+subprojects {
+
+  apply plugin: 'java'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+
+  eclipse {
+    classpath {
+      downloadSources = true
+      downloadJavadoc = true
+    }
+  }
+
+  dependencies {
+    compileOnly "com.foilen:foilen-infra-plugin-core:$foilenInfraPluginVersion"
+
+    testCompile "com.foilen:foilen-infra-system-core-system-fake:$foilenInfraSystemVersion"
+  }
+
+  task copyToLib(type: Copy) {
+    into "$buildDir/libs"
+    from configurations.runtime
+  }
+  build.dependsOn copyToLib
+
+}
+
+task wrapper(type: Wrapper) { gradleVersion = '4.7' }

@@ -1,0 +1,61 @@
+plugins {
+  id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+dependencies {
+
+  compile "org.shredzone.acme4j:acme4j-client:$acme4jVersion"
+  compile "org.shredzone.acme4j:acme4j-utils:$acme4jVersion"
+
+  compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-webcertificate:0.1.0"
+  
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourcesJar
+  archives javadocJar
+}
+
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
+
+  publish = true
+
+  pkg {
+    repo = 'maven'
+    userOrg = 'foilen'
+    name = 'com.foilen:foilen-infra-resource-letsencrypt'
+    licenses = ['MIT']
+    vcsUrl = 'https://github.com/foilen/foilen-infra-resource-letsencrypt.git'
+  }
+
+  publications = ['MyPublication']
+}
+
+publishing {
+  publications {
+    MyPublication(MavenPublication) {
+      from components.java
+      artifact sourcesJar
+      artifact javadocJar
+      groupId 'com.foilen'
+      artifactId 'foilen-infra-resource-letsencrypt'
+    }
+  }
+}
+
