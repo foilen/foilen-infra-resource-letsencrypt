@@ -17,23 +17,28 @@ import com.foilen.infra.plugin.v1.model.resource.InfraPluginResourceCategory;
 public class LetsencryptConfig extends AbstractIPResource {
 
     public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_CONTACT_EMAIL = "contactEmail";
+    public static final String PROPERTY_ACCOUNT_KEYPAIR_PEM = "accountKeypairPem";
+    public static final String PROPERTY_DNS_UPDATED_SUB_DOMAIN = "dnsUpdatedSubDomain";
+    public static final String PROPERTY_TAG_NAME = "tagName";
+    public static final String PROPERTY_IS_STAGING = "staging";
 
     private String name;
     private String contactEmail;
     private String accountKeypairPem;
     private String dnsUpdatedSubDomain;
     private String tagName;
-    private boolean isStagging = false;
+    private boolean isStaging;
 
     public LetsencryptConfig() {
     }
 
-    public LetsencryptConfig(String name, String contactEmail, String accountKeypairPem, String dnsUpdatedSubDomain, boolean isStagging, String tagName) {
+    public LetsencryptConfig(String name, String contactEmail, String accountKeypairPem, String dnsUpdatedSubDomain, boolean isStaging, String tagName) {
         this.name = name;
         this.contactEmail = contactEmail;
         this.accountKeypairPem = accountKeypairPem;
         this.dnsUpdatedSubDomain = dnsUpdatedSubDomain;
-        this.isStagging = isStagging;
+        this.isStaging = isStaging;
         this.tagName = tagName;
     }
 
@@ -62,7 +67,7 @@ public class LetsencryptConfig extends AbstractIPResource {
     public String getResourceDescription() {
         return contactEmail //
                 + " | " + //
-                (isStagging ? "STAGGING" : "PROD");
+                (isStaging ? "STAGGING" : "PROD");
     }
 
     @Override
@@ -75,14 +80,14 @@ public class LetsencryptConfig extends AbstractIPResource {
     }
 
     public String getUrl() {
-        if (isStagging) {
+        if (isStaging) {
             return "acme://letsencrypt.org/staging";
         }
         return "acme://letsencrypt.org/";
     }
 
-    public boolean isStagging() {
-        return isStagging;
+    public boolean isStaging() {
+        return isStaging;
     }
 
     public void setAccountKeypairPem(String accountKeypairPem) {
@@ -101,8 +106,8 @@ public class LetsencryptConfig extends AbstractIPResource {
         this.name = name;
     }
 
-    public void setStagging(boolean isStagging) {
-        this.isStagging = isStagging;
+    public void setStaging(boolean isStaging) {
+        this.isStaging = isStaging;
     }
 
     public void setTagName(String tagName) {

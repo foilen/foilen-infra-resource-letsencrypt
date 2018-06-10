@@ -1,0 +1,13 @@
+{
+  "accountKeypairPem" : "--IS SET--",
+  "contactEmail" : "admin@example.com",
+  "dnsUpdatedSubDomain" : "letsencrypt.example.com",
+  "name" : "The Name",
+  "resourceCategory" : "NET",
+  "resourceDescription" : "admin@example.com | STAGGING",
+  "resourceEditorName" : null,
+  "resourceName" : "The Name",
+  "staging" : true,
+  "tagName" : "--IS SET--",
+  "url" : "acme://letsencrypt.org/staging"
+}

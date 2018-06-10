@@ -4,6 +4,7 @@ dependencies {
   compile "com.foilen:foilen-infra-system-core-system-fake:$foilenInfraSystemVersion"
   
   compile "com.foilen:foilen-infra-resource-application:0.1.0"
+  compile "com.foilen:foilen-infra-resource-dns:0.1.0"
   compile "com.foilen:foilen-infra-resource-domain:0.1.0"
   compile "com.foilen:foilen-infra-resource-machine:0.1.1"
   compile "com.foilen:foilen-infra-resource-mariadb:0.1.0"

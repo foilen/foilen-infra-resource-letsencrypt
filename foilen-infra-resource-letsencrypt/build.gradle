@@ -1,9 +1,14 @@
 plugins {
+  id "com.github.johnrengelman.shadow" version "2.0.4"
   id "com.jfrog.bintray" version "1.7.3"
 }
 
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
+
+configurations {
+	testCompile.extendsFrom compileOnly
+}
 
 dependencies {
 
@@ -11,8 +16,22 @@ dependencies {
   compile "org.shredzone.acme4j:acme4j-utils:$acme4jVersion"
 
   compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-domain:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-machine:0.1.0"
   compileOnly "com.foilen:foilen-infra-resource-webcertificate:0.1.0"
   
+}
+
+shadowJar {
+  configurations = [project.configurations.compile]
+  
+  dependencies {
+    exclude(dependency('org.slf4j:slf4j-api:1.7.25'))
+  }
+  
+  classifier = null
+  
+  relocate 'org', 'cfirl.org'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

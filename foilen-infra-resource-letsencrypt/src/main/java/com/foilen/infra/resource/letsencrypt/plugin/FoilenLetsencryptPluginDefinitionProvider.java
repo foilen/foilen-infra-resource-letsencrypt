@@ -36,7 +36,11 @@ public class FoilenLetsencryptPluginDefinitionProvider implements IPPluginDefini
 
         // Resource editors
         pluginDefinition.addTranslations("/com/foilen/infra/resource/letsencrypt/messages");
+        pluginDefinition.addResourceEditor(new LetsencryptConfigEditor(), LetsencryptConfigEditor.EDITOR_NAME);
         pluginDefinition.addResourceEditor(new LetsEncryptWebsiteCertificateEditor(), LetsEncryptWebsiteCertificateEditor.EDITOR_NAME);
+
+        // Updater
+        pluginDefinition.addUpdateHandler(new LetsencryptConfigUpdateHandler());
 
         return pluginDefinition;
     }

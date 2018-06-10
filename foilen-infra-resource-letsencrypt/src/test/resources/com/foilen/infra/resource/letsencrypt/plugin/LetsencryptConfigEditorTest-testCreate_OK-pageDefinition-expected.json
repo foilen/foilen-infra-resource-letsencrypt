@@ -1,0 +1,39 @@
+{
+  "pageTitle" : "Let's Encrypt Configuration",
+  "pageItems" : [ {
+    "fieldName" : "name",
+    "fieldValue" : "The Name",
+    "label" : "Name",
+    "placeholder" : null,
+    "password" : false
+  }, {
+    "fieldName" : "contactEmail",
+    "fieldValue" : "admin@example.com",
+    "label" : "Contact Email for the Let's Encrypt account",
+    "placeholder" : null,
+    "password" : false
+  }, {
+    "fieldName" : "accountKeypairPem",
+    "fieldValue" : "--IS SET--",
+    "label" : "Let's Encrypt account key pair (optional. Will be generated if not provided)",
+    "rows" : 10
+  }, {
+    "fieldName" : "dnsUpdatedSubDomain",
+    "fieldValue" : "letsencrypt.example.com",
+    "label" : "A temporary domain to confirm the DNS challenges are ready",
+    "placeholder" : null,
+    "password" : false
+  }, {
+    "fieldName" : "tagName",
+    "fieldValue" : "--IS SET--",
+    "label" : "A tag name to tag all the DNS challenges (optional. Will generate a random one if not provided)",
+    "placeholder" : null,
+    "password" : false
+  }, {
+    "fieldName" : "staging",
+    "fieldValue" : "true",
+    "label" : "In testing mode? (true/false) (true to use the staging server. The certificates won't be useful, but for testing the plugin)",
+    "placeholder" : null,
+    "password" : false
+  } ]
+}

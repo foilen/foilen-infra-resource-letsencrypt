@@ -1,0 +1,21 @@
+{
+  "resources" : [ {
+    "resource" : "Domain | example.com | Domain for example.com",
+    "links" : [ ],
+    "tags" : [ ]
+  }, {
+    "resource" : "Domain | letsencrypt.example.com | Domain for letsencrypt.example.com",
+    "links" : [ {
+      "type" : "MANAGES",
+      "to" : "Domain | example.com | Domain for example.com"
+    } ],
+    "tags" : [ ]
+  }, {
+    "resource" : "LetsencryptConfig | The Name | admin@example.com | STAGGING",
+    "links" : [ {
+      "type" : "MANAGES",
+      "to" : "Domain | letsencrypt.example.com | Domain for letsencrypt.example.com"
+    } ],
+    "tags" : [ ]
+  } ]
+}
