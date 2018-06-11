@@ -40,12 +40,6 @@ subprojects {
     testCompile "com.foilen:foilen-infra-system-core-system-fake:$foilenInfraSystemVersion"
   }
 
-  task copyToLib(type: Copy) {
-    into "$buildDir/libs"
-    from configurations.runtime
-  }
-  build.dependsOn copyToLib
-
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '4.7' }
