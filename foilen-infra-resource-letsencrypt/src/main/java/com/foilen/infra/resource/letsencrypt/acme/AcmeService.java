@@ -15,7 +15,6 @@ import org.shredzone.acme4j.challenge.Dns01Challenge;
 import com.foilen.smalltools.crypt.spongycastle.cert.RSACertificate;
 import com.foilen.smalltools.tuple.Tuple2;
 
-// TODO + Fat jar
 public interface AcmeService {
 
     void challengeComplete(Dns01Challenge dnsChallenge);
