@@ -17,17 +17,13 @@ dependencies {
 
   compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
   compileOnly "com.foilen:foilen-infra-resource-domain:0.1.0"
-  compileOnly "com.foilen:foilen-infra-resource-machine:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-machine:0.1.1"
   compileOnly "com.foilen:foilen-infra-resource-webcertificate:0.1.0"
   
 }
 
 shadowJar {
   configurations = [project.configurations.compile]
-  
-  dependencies {
-    exclude(dependency('org.slf4j:slf4j-api:1.7.25'))
-  }
   
   classifier = null
   

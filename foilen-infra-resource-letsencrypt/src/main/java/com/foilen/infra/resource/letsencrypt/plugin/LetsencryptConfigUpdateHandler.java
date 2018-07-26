@@ -9,6 +9,9 @@
  */
 package com.foilen.infra.resource.letsencrypt.plugin;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.foilen.infra.plugin.v1.core.common.DomainHelper;
 import com.foilen.infra.plugin.v1.core.context.ChangesContext;
 import com.foilen.infra.plugin.v1.core.context.CommonServicesContext;
@@ -21,6 +24,8 @@ import com.foilen.smalltools.tools.SecureRandomTools;
 import com.google.common.base.Strings;
 
 public class LetsencryptConfigUpdateHandler extends AbstractCommonMethodUpdateEventHandler<LetsencryptConfig> {
+
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass()); // TODO +++ Remove
 
     @Override
     protected void commonHandlerExecute(CommonServicesContext services, ChangesContext changes, CommonMethodUpdateEventHandlerContext<LetsencryptConfig> context) {
