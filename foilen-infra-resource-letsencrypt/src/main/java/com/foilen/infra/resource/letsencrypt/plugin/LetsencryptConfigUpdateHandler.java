@@ -50,7 +50,7 @@ public class LetsencryptConfigUpdateHandler extends AbstractCommonMethodUpdateEv
         // tagName
         if (Strings.isNullOrEmpty(resource.getTagName())) {
             logger.info("Generating a Tag name");
-            resource.setTagName("letsencrypt_" + SecureRandomTools.randomHexString(10));
+            resource.setTagName("letsencrypt_" + SecureRandomTools.randomHexString(10).toLowerCase());
             update = true;
         }
 
