@@ -25,7 +25,7 @@ import com.google.common.base.Strings;
 
 public class LetsencryptConfigUpdateHandler extends AbstractCommonMethodUpdateEventHandler<LetsencryptConfig> {
 
-    protected final transient Logger logger = LoggerFactory.getLogger(getClass()); // TODO +++ Remove
+    protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     protected void commonHandlerExecute(CommonServicesContext services, ChangesContext changes, CommonMethodUpdateEventHandlerContext<LetsencryptConfig> context) {
@@ -37,18 +37,26 @@ public class LetsencryptConfigUpdateHandler extends AbstractCommonMethodUpdateEv
         String dnsUpdatedSubDomain = resource.getDnsUpdatedSubDomain();
         context.addManagedResources(new Domain(dnsUpdatedSubDomain, DomainHelper.reverseDomainName(dnsUpdatedSubDomain)));
 
+        boolean update = false;
         // accountKeypairPem
         if (Strings.isNullOrEmpty(resource.getAccountKeypairPem())) {
             logger.info("Generating an AccountKeypair");
             AsymmetricKeys keys = RSACrypt.RSA_CRYPT.generateKeyPair(4096);
             String accountPem = RSACrypt.RSA_CRYPT.savePrivateKeyPemAsString(keys) + RSACrypt.RSA_CRYPT.savePublicKeyPemAsString(keys);
             resource.setAccountKeypairPem(accountPem);
+            update = true;
         }
 
         // tagName
         if (Strings.isNullOrEmpty(resource.getTagName())) {
             logger.info("Generating a Tag name");
-            resource.setTagName("letsencrypt_" + SecureRandomTools.randomBase64String(10));
+            resource.setTagName("letsencrypt_" + SecureRandomTools.randomHexString(10));
+            update = true;
+        }
+
+        // Update if changed
+        if (update) {
+            changes.resourceUpdate(resource);
         }
 
     }
