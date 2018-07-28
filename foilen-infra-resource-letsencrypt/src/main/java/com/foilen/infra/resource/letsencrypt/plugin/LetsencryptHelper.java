@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shredzone.acme4j.Order;
 import org.shredzone.acme4j.challenge.Dns01Challenge;
@@ -71,7 +72,7 @@ public abstract class LetsencryptHelper {
             throw new IllegalUpdateException("The LetsencryptConfig does not have a tag name");
         }
 
-        logger.info("Will update certificates: {}", certificatesToUpdate);
+        logger.info("Will update certificates: {}", certificatesToUpdate.stream().flatMap(it -> it.getDomainNames().stream()).sorted().collect(Collectors.toList()));
         AcmeService acmeService = new AcmeServiceImpl(config);
 
         // Get the challenges
