@@ -68,11 +68,10 @@ public abstract class LetsencryptHelper {
 
         String tagName = config.getTagName();
         if (tagName == null) {
-            tagName = "letsencrypt_" + SecureRandomTools.randomBase64String(10);
-            config.setTagName(tagName);
-            changes.resourceUpdate(config);
+            throw new IllegalUpdateException("The LetsencryptConfig does not have a tag name");
         }
 
+        logger.info("Will update certificates: {}", certificatesToUpdate);
         AcmeService acmeService = new AcmeServiceImpl(config);
 
         // Get the challenges

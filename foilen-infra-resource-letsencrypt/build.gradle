@@ -12,8 +12,12 @@ configurations {
 
 dependencies {
 
-  compile "org.shredzone.acme4j:acme4j-client:$acme4jVersion"
-  compile "org.shredzone.acme4j:acme4j-utils:$acme4jVersion"
+  compile ("org.shredzone.acme4j:acme4j-client:$acme4jVersion") {
+  	transitive = false
+  }
+  compile ("org.shredzone.acme4j:acme4j-utils:$acme4jVersion") {
+  	transitive = false
+  }
 
   compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
   compileOnly "com.foilen:foilen-infra-resource-domain:0.1.0"
@@ -26,8 +30,6 @@ shadowJar {
   configurations = [project.configurations.compile]
   
   classifier = null
-  
-  relocate 'org', 'cfirl.org'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
