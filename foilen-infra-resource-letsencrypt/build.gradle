@@ -12,12 +12,8 @@ configurations {
 
 dependencies {
 
-  compile ("org.shredzone.acme4j:acme4j-client:$acme4jVersion") {
-  	transitive = false
-  }
-  compile ("org.shredzone.acme4j:acme4j-utils:$acme4jVersion") {
-  	transitive = false
-  }
+  compile ("org.shredzone.acme4j:acme4j-client:$acme4jVersion")
+  compile ("org.shredzone.acme4j:acme4j-utils:$acme4jVersion")
 
   compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
   compileOnly "com.foilen:foilen-infra-resource-domain:0.1.0"
@@ -30,6 +26,12 @@ shadowJar {
   configurations = [project.configurations.compile]
   
   classifier = null
+  
+  dependencies {
+    exclude(dependency('org.slf4j:slf4j-api:1.7.25'))
+    exclude(dependency('org.bouncycastle:bcprov-jdk15on:1.60'))
+    exclude(dependency('org.bouncycastle:bcpkix-jdk15on:1.60'))
+  }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -63,6 +65,8 @@ bintray {
 
   publications = ['MyPublication']
 }
+
+bintrayUpload.dependsOn shadowJar
 
 publishing {
   publications {
