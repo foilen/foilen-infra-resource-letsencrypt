@@ -109,7 +109,7 @@ public abstract class LetsencryptHelper {
         }
 
         // Add the waiting domain
-        String dnsWaitDomain = SecureRandomTools.randomHexString(5) + config.getDnsUpdatedSubDomain();
+        String dnsWaitDomain = "z" + SecureRandomTools.randomHexString(5).toLowerCase() + config.getDnsUpdatedSubDomain();
         logger.info("Adding the DNS Wait domain {}", dnsWaitDomain);
 
         DnsEntry dnsEntry = new DnsEntry(dnsWaitDomain, DnsEntryType.A, "127.0.0.1");
