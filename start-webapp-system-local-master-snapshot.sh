@@ -22,7 +22,7 @@ docker run -ti \
 
 # Create release
 ./create-local-release.sh
-cp foilen-infra-resource-letsencrypt/build/libs/foilen-infra-resource-letsencrypt-master-SNAPSHOT.jar $FOLDER_PLUGINS_JARS
+cp build/libs/foilen-infra-resource-letsencrypt-master-SNAPSHOT.jar $FOLDER_PLUGINS_JARS
 
 # Start webapp
 docker run -ti \

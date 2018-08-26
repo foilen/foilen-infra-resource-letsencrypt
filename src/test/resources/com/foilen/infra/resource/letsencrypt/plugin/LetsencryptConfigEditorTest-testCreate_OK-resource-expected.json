@@ -2,6 +2,7 @@
   "accountKeypairPem" : "--IS SET--",
   "contactEmail" : "admin@example.com",
   "dnsUpdatedSubDomain" : "letsencrypt.example.com",
+  "meta" : { },
   "name" : "The Name",
   "resourceCategory" : "NET",
   "resourceDescription" : "admin@example.com | STAGGING",
