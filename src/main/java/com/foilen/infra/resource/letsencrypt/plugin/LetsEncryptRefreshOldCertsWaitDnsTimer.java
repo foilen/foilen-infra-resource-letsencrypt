@@ -23,8 +23,6 @@ import java.util.Map.Entry;
 import org.shredzone.acme4j.Order;
 import org.shredzone.acme4j.challenge.Dns01Challenge;
 import org.shredzone.acme4j.util.CSRBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.foilen.infra.plugin.v1.core.context.ChangesContext;
 import com.foilen.infra.plugin.v1.core.context.CommonServicesContext;
@@ -42,13 +40,12 @@ import com.foilen.smalltools.crypt.spongycastle.asymmetric.AsymmetricKeys;
 import com.foilen.smalltools.crypt.spongycastle.asymmetric.RSACrypt;
 import com.foilen.smalltools.crypt.spongycastle.cert.RSACertificate;
 import com.foilen.smalltools.crypt.spongycastle.cert.RSATools;
+import com.foilen.smalltools.tools.AbstractBasics;
 import com.foilen.smalltools.tools.ResourceTools;
 import com.foilen.smalltools.tuple.Tuple2;
 import com.google.common.base.Joiner;
 
-public class LetsEncryptRefreshOldCertsWaitDnsTimer implements TimerEventHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(LetsEncryptRefreshOldCertsWaitDnsTimer.class);
+public class LetsEncryptRefreshOldCertsWaitDnsTimer extends AbstractBasics implements TimerEventHandler {
 
     private static final String CA_CERTIFICATE_TEXT = ResourceTools.getResourceAsString("/com/foilen/infra/resource/letsencrypt/lets-encrypt-x3-cross-signed.pem");
 
@@ -102,6 +99,7 @@ public class LetsEncryptRefreshOldCertsWaitDnsTimer implements TimerEventHandler
 
             // Complete the challenges
             logger.info("Complete challenges");
+            IPResourceService resourceService = services.getResourceService();
             Iterator<Entry<String, Tuple2<Order, Dns01Challenge>>> it = challengeByDomain.entrySet().iterator();
             while (it.hasNext()) {
                 Entry<String, Tuple2<Order, Dns01Challenge>> entry = it.next();
@@ -111,13 +109,23 @@ public class LetsEncryptRefreshOldCertsWaitDnsTimer implements TimerEventHandler
                 } catch (LetsencryptException e) {
                     // Challenge failed
                     logger.info("Failed the challenge for certificate: {}", entry.getKey());
+
+                    // Update meta as failure
+                    resourceService.resourceFindAll( //
+                            resourceService.createResourceQuery(WebsiteCertificate.class) //
+                                    .addEditorEquals(LetsEncryptWebsiteCertificateEditor.EDITOR_NAME) //
+                                    .propertyEquals(WebsiteCertificate.PROPERTY_DOMAIN_NAMES, Collections.singleton(entry.getKey()))) //
+                            .forEach(websiteCertificate -> {
+                                websiteCertificate.getMeta().put(LetsencryptHelper.LAST_FAILURE, String.valueOf(System.currentTimeMillis()));
+                                changes.resourceUpdate(websiteCertificate);
+                            });
+
                     it.remove();
                 }
             }
 
             // Get all the certificates
             logger.info("Get all the certificates currently in the system");
-            IPResourceService resourceService = services.getResourceService();
             List<WebsiteCertificate> websiteCertificates = new ArrayList<>();
             for (String domain : challengeByDomain.keySet()) {
                 websiteCertificates.addAll(resourceService.resourceFindAll( //

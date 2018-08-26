@@ -40,6 +40,8 @@ import com.google.common.base.Joiner;
 
 public abstract class LetsencryptHelper {
 
+    public static final String LAST_FAILURE = "lastFailure";
+
     private static final Logger logger = LoggerFactory.getLogger(LetsencryptHelper.class);
 
     /**
@@ -87,10 +89,15 @@ public abstract class LetsencryptHelper {
                 Dns01Challenge dnsChallenge = orderAndDnsChallenge.getB();
                 challengeByDomain.put(domain, orderAndDnsChallenge);
                 String digest = dnsChallenge.getDigest();
+
+                // Add DnsEntries if does not already exist
                 DnsEntry dnsEntry = new DnsEntry("_acme-challenge." + domain, DnsEntryType.TXT, digest);
-                changes.resourceAdd(dnsEntry);
-                changes.linkAdd(certificate, LinkTypeConstants.MANAGES, dnsEntry);
-                changes.tagAdd(dnsEntry, tagName);
+                Optional<DnsEntry> existingDnsEntry = resourceService.resourceFindByPk(dnsEntry);
+                if (!existingDnsEntry.isPresent()) {
+                    changes.resourceAdd(dnsEntry);
+                    changes.linkAdd(certificate, LinkTypeConstants.MANAGES, dnsEntry);
+                    changes.tagAdd(dnsEntry, tagName);
+                }
             } catch (LetsencryptException e) {
                 logger.error("Cannot get the challenge for domain {}", domain, e);
                 domainsWithoutChallenge.add(domain + " : " + e.getMessage());

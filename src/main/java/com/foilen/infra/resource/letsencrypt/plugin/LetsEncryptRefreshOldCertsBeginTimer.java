@@ -62,6 +62,21 @@ public class LetsEncryptRefreshOldCertsBeginTimer extends AbstractBasics impleme
                         .propertyLesserAndEquals(WebsiteCertificate.PROPERTY_END, DateTools.addDate(new Date(), Calendar.WEEK_OF_YEAR, 3) //
                 ));
 
+        logger.info("Got {} certificates that will expire", certificatesToUpdate.size());
+        // Remove those that failed in the last day
+        long beforeTime = System.currentTimeMillis() - 23 * 60 * 60000;
+        certificatesToUpdate.removeIf(websiteCertificate -> {
+            String value = websiteCertificate.getMeta().get(LetsencryptHelper.LAST_FAILURE);
+            if (value != null) {
+                try {
+                    long lastFailure = Long.valueOf(value);
+                    return lastFailure > beforeTime;
+                } catch (Exception e) {
+                }
+            }
+            return false;
+        });
+
         logger.info("Got {} certificates to update", certificatesToUpdate.size());
         if (certificatesToUpdate.isEmpty()) {
             return;
