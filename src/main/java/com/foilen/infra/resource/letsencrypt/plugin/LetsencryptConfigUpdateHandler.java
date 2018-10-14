@@ -9,12 +9,10 @@
  */
 package com.foilen.infra.resource.letsencrypt.plugin;
 
-import com.foilen.infra.plugin.v1.core.common.DomainHelper;
 import com.foilen.infra.plugin.v1.core.context.ChangesContext;
 import com.foilen.infra.plugin.v1.core.context.CommonServicesContext;
 import com.foilen.infra.plugin.v1.core.eventhandler.AbstractCommonMethodUpdateEventHandler;
 import com.foilen.infra.plugin.v1.core.eventhandler.CommonMethodUpdateEventHandlerContext;
-import com.foilen.infra.resource.domain.Domain;
 import com.foilen.smalltools.crypt.spongycastle.asymmetric.AsymmetricKeys;
 import com.foilen.smalltools.crypt.spongycastle.asymmetric.RSACrypt;
 import com.foilen.smalltools.tools.SecureRandomTools;
@@ -26,11 +24,6 @@ public class LetsencryptConfigUpdateHandler extends AbstractCommonMethodUpdateEv
     protected void commonHandlerExecute(CommonServicesContext services, ChangesContext changes, CommonMethodUpdateEventHandlerContext<LetsencryptConfig> context) {
 
         LetsencryptConfig resource = context.getResource();
-
-        // Domain
-        context.addManagedResourceTypes(Domain.class);
-        String dnsUpdatedSubDomain = resource.getDnsUpdatedSubDomain();
-        context.addManagedResources(new Domain(dnsUpdatedSubDomain, DomainHelper.reverseDomainName(dnsUpdatedSubDomain)));
 
         boolean update = false;
         // accountKeypairPem

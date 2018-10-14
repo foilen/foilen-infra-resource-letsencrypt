@@ -16,6 +16,8 @@ import com.foilen.infra.plugin.v1.model.resource.InfraPluginResourceCategory;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LetsencryptConfig extends AbstractIPResource {
 
+    public static final String RESOURCE_TYPE = "Letsencrypt Config";
+
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_CONTACT_EMAIL = "contactEmail";
     public static final String PROPERTY_ACCOUNT_KEYPAIR_PEM = "accountKeypairPem";

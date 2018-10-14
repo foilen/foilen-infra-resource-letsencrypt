@@ -44,10 +44,9 @@ dependencies {
   compile ("org.shredzone.acme4j:acme4j-client:$acme4jVersion")
   compile ("org.shredzone.acme4j:acme4j-utils:$acme4jVersion")
 
-  compileOnly "com.foilen:foilen-infra-resource-dns:0.1.0"
-  compileOnly "com.foilen:foilen-infra-resource-domain:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-dns:0.1.6"
   compileOnly "com.foilen:foilen-infra-resource-machine:0.1.1"
-  compileOnly "com.foilen:foilen-infra-resource-webcertificate:0.1.0"
+  compileOnly "com.foilen:foilen-infra-resource-webcertificate:0.1.2"
 }
 
 shadowJar {

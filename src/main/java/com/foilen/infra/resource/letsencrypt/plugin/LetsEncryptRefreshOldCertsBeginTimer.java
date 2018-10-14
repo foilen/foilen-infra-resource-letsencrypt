@@ -60,7 +60,7 @@ public class LetsEncryptRefreshOldCertsBeginTimer extends AbstractBasics impleme
                 resourceService.createResourceQuery(WebsiteCertificate.class) //
                         .addEditorEquals(LetsEncryptWebsiteCertificateEditor.EDITOR_NAME) //
                         .propertyLesserAndEquals(WebsiteCertificate.PROPERTY_END, DateTools.addDate(new Date(), Calendar.WEEK_OF_YEAR, 3) //
-                ));
+                        ));
 
         logger.info("Got {} certificates that will expire", certificatesToUpdate.size());
         // Remove those that failed in the last day

@@ -23,7 +23,7 @@ public class FoilenLetsencryptPluginDefinitionProvider implements IPPluginDefini
     public IPPluginDefinitionV1 getIPPluginDefinition() {
         IPPluginDefinitionV1 pluginDefinition = new IPPluginDefinitionV1("Foilen", "Lets Encrypt", "Automatically retrieve letsencrypt certificates", "1.0.0");
 
-        pluginDefinition.addCustomResource(LetsencryptConfig.class, "Letsencrypt Config", //
+        pluginDefinition.addCustomResource(LetsencryptConfig.class, LetsencryptConfig.RESOURCE_TYPE, //
                 Arrays.asList(LetsencryptConfig.PROPERTY_NAME), //
                 Collections.emptyList());
 
